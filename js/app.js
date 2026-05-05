@@ -10,7 +10,6 @@ const loadingState = document.getElementById('loading-state');
 const emptyState = document.getElementById('empty-state');
 const detailModal = document.getElementById('detail-modal');
 const favoritesPanel = document.getElementById('favorites-panel');
-const favCount = document.getElementById('fav-count');
 const toast = document.getElementById('toast');
 
 // ===== Init =====
@@ -23,7 +22,6 @@ async function init() {
     setupFavoritesPanel();
     await loadPrompts();
     renderGallery();
-    updateFavCount();
 }
 
 // ===== Data Loading =====
@@ -230,14 +228,7 @@ function toggleFavorite(id) {
         showToast('Removed from favorites');
     }
     localStorage.setItem('pg_favorites', JSON.stringify(favorites));
-    updateFavCount();
     renderFavoritesList();
-}
-
-function updateFavCount() {
-    const count = favorites.length;
-    favCount.textContent = count;
-    favCount.setAttribute('data-count', count);
 }
 
 function setupFavoritesPanel() {
