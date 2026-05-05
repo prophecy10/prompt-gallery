@@ -115,27 +115,7 @@ body {
 .icon-sun { display: none; }
 .icon-moon { display: block; }
 
-/* Favorites count badge */
-.fav-count {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background: var(--accent);
-    color: white;
-    font-size: 10px;
-    font-weight: 600;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.fav-count:empty,
-.fav-count[data-count="0"] {
-    display: none;
-}
+/* Favorites count badge - removed */
 
 /* ===== Filters ===== */
 .filters-bar {
@@ -257,8 +237,19 @@ body {
     padding: 12px;
 }
 
-.gallery-card:hover .card-overlay {
-    opacity: 1;
+/* Desktop: show on hover */
+@media (hover: hover) {
+    .gallery-card:hover .card-overlay {
+        opacity: 1;
+    }
+}
+
+/* Touch devices: always show overlay */
+@media (hover: none) {
+    .card-overlay {
+        opacity: 1;
+        background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%);
+    }
 }
 
 .card-actions {
