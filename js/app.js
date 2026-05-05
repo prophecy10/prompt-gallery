@@ -72,7 +72,6 @@ function cardHTML(prompt) {
     return `
         <div class="gallery-card" data-id="${prompt.id}">
             <div class="card-image-wrap">
-                <span class="card-category">${prompt.category}</span>
                 <img src="${prompt.image}" alt="AI prompt image" class="card-image" loading="lazy">
                 <div class="card-overlay">
                     <div class="card-actions">
