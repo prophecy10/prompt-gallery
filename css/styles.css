@@ -229,7 +229,7 @@ body {
 .card-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%);
+    background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%);
     opacity: 0;
     transition: opacity 0.2s ease;
     display: flex;
@@ -244,11 +244,11 @@ body {
     }
 }
 
-/* Touch devices: always show overlay */
+/* Touch devices: always show buttons, minimal background */
 @media (hover: none) {
     .card-overlay {
         opacity: 1;
-        background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%);
+        background: linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 30%);
     }
 }
 
@@ -278,6 +278,15 @@ body {
     transform: scale(1.1);
 }
 
+/* On mobile, make buttons slightly smaller and more transparent */
+@media (hover: none) {
+    .card-btn {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.75);
+    }
+}
+
 .card-btn.favorited {
     background: #fee2e2;
     color: #ef4444;
@@ -293,17 +302,7 @@ body {
 }
 
 .card-category {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: capitalize;
-    backdrop-filter: blur(4px);
+    display: none;
 }
 
 /* ===== Loading & Empty States ===== */
