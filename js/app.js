@@ -1,8 +1,12 @@
 // ===== State =====
 let prompts = [];
 let favorites = JSON.parse(localStorage.getItem('pg_favorites')) || [];
+let viewCounts = JSON.parse(localStorage.getItem('pg_views')) || {};
 let currentCategory = 'all';
 let currentPrompt = null;
+let searchQuery = '';
+let displayedCount = 0;
+const BATCH_SIZE = 20;
 
 // ===== DOM =====
 const galleryGrid = document.getElementById('gallery-grid');
@@ -18,8 +22,13 @@ document.addEventListener('DOMContentLoaded', init);
 async function init() {
     setupTheme();
     setupFilters();
+    setupSearch();
     setupModal();
     setupFavoritesPanel();
+    setupInfiniteScroll();
+    setupPullToRefresh();
+    setupSwipeNavigation();
+    registerServiceWorker();
     await loadPrompts();
     renderGallery();
 }
@@ -27,7 +36,6 @@ async function init() {
 // ===== Data Loading =====
 async function loadPrompts() {
     try {
-        // Load from local prompts.json (same repo)
         const response = await fetch('prompts.json');
         if (!response.ok) throw new Error('Failed to load');
         const data = await response.json();
@@ -50,29 +58,60 @@ async function loadPrompts() {
     loadingState.classList.add('hidden');
 }
 
-// ===== Rendering =====
-function renderGallery() {
-    const filtered = currentCategory === 'all'
+// ===== Filtering & Search =====
+function getFilteredPrompts() {
+    let filtered = currentCategory === 'all'
         ? prompts
         : prompts.filter(p => p.category === currentCategory);
 
+    if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(p => p.prompt.toLowerCase().includes(query));
+    }
+
+    return filtered;
+}
+
+// ===== Rendering =====
+function renderGallery() {
+    displayedCount = 0;
+    galleryGrid.innerHTML = '';
+
+    const filtered = getFilteredPrompts();
+
     if (filtered.length === 0) {
-        galleryGrid.innerHTML = '';
         emptyState.classList.remove('hidden');
         return;
     }
 
     emptyState.classList.add('hidden');
-    galleryGrid.innerHTML = filtered.map(cardHTML).join('');
+    loadMoreCards();
+}
+
+function loadMoreCards() {
+    const filtered = getFilteredPrompts();
+    const nextBatch = filtered.slice(displayedCount, displayedCount + BATCH_SIZE);
+
+    if (nextBatch.length === 0) return;
+
+    const html = nextBatch.map(cardHTML).join('');
+    galleryGrid.insertAdjacentHTML('beforeend', html);
+    displayedCount += nextBatch.length;
+
     attachCardListeners();
 }
 
 function cardHTML(prompt) {
     const isFav = favorites.includes(prompt.id);
+    const isNew = isNewPrompt(prompt.date);
+    const views = viewCounts[prompt.id] || 0;
+
     return `
         <div class="gallery-card" data-id="${prompt.id}">
-            <div class="card-image-wrap">
-                <img src="${prompt.image}" alt="AI prompt image" class="card-image" loading="lazy">
+            <div class="card-image-wrap loading">
+                <img src="${prompt.image}" alt="AI prompt image" class="card-image" loading="lazy" onload="this.parentElement.classList.remove('loading')">
+                ${isNew ? '<span class="card-badge">New</span>' : ''}
+                ${views > 0 ? `<span class="card-views"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>${views}</span>` : ''}
                 <div class="card-overlay">
                     <div class="card-actions">
                         <button class="card-btn card-fav-btn ${isFav ? 'favorited' : ''}" data-id="${prompt.id}" aria-label="Favorite">
@@ -93,9 +132,19 @@ function cardHTML(prompt) {
     `;
 }
 
+function isNewPrompt(dateStr) {
+    const promptDate = new Date(dateStr);
+    const now = new Date();
+    const diffDays = (now - promptDate) / (1000 * 60 * 60 * 24);
+    return diffDays <= 3; // "New" badge for prompts added in last 3 days
+}
+
 function attachCardListeners() {
-    // Card click → open modal
     galleryGrid.querySelectorAll('.gallery-card').forEach(card => {
+        // Remove old listeners by cloning (only for newly added)
+        if (card.dataset.bound) return;
+        card.dataset.bound = 'true';
+
         card.addEventListener('click', (e) => {
             if (e.target.closest('.card-btn')) return;
             const id = parseInt(card.dataset.id);
@@ -103,8 +152,10 @@ function attachCardListeners() {
         });
     });
 
-    // Favorite buttons
     galleryGrid.querySelectorAll('.card-fav-btn').forEach(btn => {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = 'true';
+
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const id = parseInt(btn.dataset.id);
@@ -113,8 +164,10 @@ function attachCardListeners() {
         });
     });
 
-    // Copy buttons
     galleryGrid.querySelectorAll('.card-copy-btn').forEach(btn => {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = 'true';
+
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const id = parseInt(btn.dataset.id);
@@ -125,6 +178,53 @@ function attachCardListeners() {
                 setTimeout(() => btn.classList.remove('copied'), 1500);
             }
         });
+    });
+}
+
+// ===== Infinite Scroll =====
+function setupInfiniteScroll() {
+    const sentinel = document.getElementById('load-more-sentinel');
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+            loadMoreCards();
+        }
+    }, { rootMargin: '200px' });
+
+    observer.observe(sentinel);
+}
+
+// ===== Search =====
+function setupSearch() {
+    const searchToggle = document.getElementById('search-toggle');
+    const searchBar = document.getElementById('search-bar');
+    const searchInput = document.getElementById('search-input');
+    const searchClear = document.getElementById('search-clear');
+
+    searchToggle.addEventListener('click', () => {
+        searchBar.classList.toggle('hidden');
+        if (!searchBar.classList.contains('hidden')) {
+            searchInput.focus();
+        } else {
+            searchInput.value = '';
+            searchQuery = '';
+            renderGallery();
+        }
+    });
+
+    let debounceTimer;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            searchQuery = searchInput.value.trim();
+            renderGallery();
+        }, 300);
+    });
+
+    searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        renderGallery();
+        searchInput.focus();
     });
 }
 
@@ -173,11 +273,19 @@ function setupModal() {
         }
     });
 
-    // ESC to close
+    // Navigation arrows
+    document.getElementById('modal-prev').addEventListener('click', () => navigateModal(-1));
+    document.getElementById('modal-next').addEventListener('click', () => navigateModal(1));
+
+    // Keyboard navigation
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             if (detailModal.classList.contains('open')) closeDetail();
             if (favoritesPanel.classList.contains('open')) closeFavorites();
+        }
+        if (detailModal.classList.contains('open')) {
+            if (e.key === 'ArrowLeft') navigateModal(-1);
+            if (e.key === 'ArrowRight') navigateModal(1);
         }
     });
 }
@@ -187,10 +295,16 @@ function openDetail(id) {
     if (!prompt) return;
     currentPrompt = prompt;
 
+    // Increment view count
+    viewCounts[id] = (viewCounts[id] || 0) + 1;
+    localStorage.setItem('pg_views', JSON.stringify(viewCounts));
+
     document.getElementById('modal-image').src = prompt.image;
     document.getElementById('modal-prompt').textContent = prompt.prompt;
     document.getElementById('modal-category').textContent = prompt.category;
+    document.getElementById('modal-view-count').textContent = viewCounts[id];
     updateModalFavBtn();
+    updateNavButtons();
 
     detailModal.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -200,6 +314,24 @@ function closeDetail() {
     detailModal.classList.remove('open');
     document.body.style.overflow = '';
     currentPrompt = null;
+}
+
+function navigateModal(direction) {
+    if (!currentPrompt) return;
+    const filtered = getFilteredPrompts();
+    const currentIdx = filtered.findIndex(p => p.id === currentPrompt.id);
+    const nextIdx = currentIdx + direction;
+
+    if (nextIdx < 0 || nextIdx >= filtered.length) return;
+
+    openDetail(filtered[nextIdx].id);
+}
+
+function updateNavButtons() {
+    const filtered = getFilteredPrompts();
+    const currentIdx = filtered.findIndex(p => p.id === currentPrompt.id);
+    document.getElementById('modal-prev').disabled = currentIdx <= 0;
+    document.getElementById('modal-next').disabled = currentIdx >= filtered.length - 1;
 }
 
 function updateModalFavBtn() {
@@ -214,6 +346,68 @@ function updateModalFavBtn() {
         btn.classList.remove('active');
         text.textContent = 'Favorite';
     }
+}
+
+// ===== Swipe Navigation (touch) =====
+function setupSwipeNavigation() {
+    const modalContainer = document.getElementById('modal-container');
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    modalContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    modalContainer.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+
+        if (Math.abs(diff) > 60) { // Minimum swipe distance
+            if (diff > 0) {
+                navigateModal(1); // Swipe left → next
+            } else {
+                navigateModal(-1); // Swipe right → prev
+            }
+        }
+    }, { passive: true });
+}
+
+// ===== Pull to Refresh =====
+function setupPullToRefresh() {
+    const indicator = document.getElementById('pull-indicator');
+    let startY = 0;
+    let pulling = false;
+
+    document.addEventListener('touchstart', (e) => {
+        if (window.scrollY === 0) {
+            startY = e.touches[0].pageY;
+            pulling = true;
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        if (!pulling) return;
+        const diff = e.touches[0].pageY - startY;
+        if (diff > 80 && window.scrollY === 0) {
+            indicator.classList.add('visible');
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchend', async () => {
+        if (indicator.classList.contains('visible')) {
+            indicator.classList.add('refreshing');
+            indicator.querySelector('span').textContent = 'Refreshing...';
+
+            await loadPrompts();
+            renderGallery();
+
+            setTimeout(() => {
+                indicator.classList.remove('visible', 'refreshing');
+                indicator.querySelector('span').textContent = 'Release to refresh';
+            }, 800);
+        }
+        pulling = false;
+    }, { passive: true });
 }
 
 // ===== Favorites =====
@@ -234,7 +428,6 @@ function setupFavoritesPanel() {
     document.getElementById('favorites-toggle').addEventListener('click', openFavorites);
     document.getElementById('close-favorites').addEventListener('click', closeFavorites);
 
-    // Backdrop
     const backdrop = document.createElement('div');
     backdrop.className = 'backdrop';
     backdrop.id = 'panel-backdrop';
@@ -281,7 +474,6 @@ function renderFavoritesList() {
         </div>
     `).join('');
 
-    // Click to open detail
     list.querySelectorAll('.fav-item').forEach(item => {
         item.addEventListener('click', (e) => {
             if (e.target.closest('.fav-item-remove')) return;
@@ -291,15 +483,23 @@ function renderFavoritesList() {
         });
     });
 
-    // Remove buttons
     list.querySelectorAll('.fav-item-remove').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const id = parseInt(btn.dataset.id);
             toggleFavorite(id);
-            renderGallery(); // Update card states
+            renderGallery();
         });
     });
+}
+
+// ===== PWA Service Worker =====
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {
+            // Service worker registration failed, not critical
+        });
+    }
 }
 
 // ===== Utilities =====
@@ -307,7 +507,6 @@ function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
         showToast('Prompt copied!');
     }).catch(() => {
-        // Fallback
         const ta = document.createElement('textarea');
         ta.value = text;
         document.body.appendChild(ta);

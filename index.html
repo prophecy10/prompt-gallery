@@ -5,39 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prompt Gallery — Curated AI Image Prompts</title>
     <meta name="description" content="Browse and copy curated AI image generation prompts. Free gallery of prompts for Gemini, Midjourney, DALL-E and more.">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Prompt Gallery — Curated AI Image Prompts">
+    <meta property="og:description" content="Browse stunning AI-generated images and copy the exact prompts used to create them. Free gallery for Gemini, Midjourney, DALL-E.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://res.cloudinary.com/ddmmf6dz4/image/upload/v1778063880/snmfuzlvmppcgmgstc9q_tdmn8u.png">
+    <meta property="og:url" content="https://prophecy10.github.io/prompt-gallery/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Prompt Gallery — Curated AI Image Prompts">
+    <meta name="twitter:description" content="Browse and copy curated AI image generation prompts.">
+    <meta name="twitter:image" content="https://res.cloudinary.com/ddmmf6dz4/image/upload/v1778063880/snmfuzlvmppcgmgstc9q_tdmn8u.png">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Pull to refresh indicator -->
+    <div class="pull-indicator" id="pull-indicator">
+        <div class="pull-spinner"></div>
+        <span>Release to refresh</span>
+    </div>
+
     <!-- Header -->
     <header class="site-header">
         <div class="header-inner">
             <div class="logo">
                 <span class="logo-icon">
-                    <svg width="30" height="30" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="wand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#7c3aed"/>
-                                <stop offset="100%" style="stop-color:#ec4899"/>
-                            </linearGradient>
-                        </defs>
-                        <!-- Wand stick -->
-                        <line x1="10" y1="42" x2="34" y2="18" stroke="url(#wand-grad)" stroke-width="4" stroke-linecap="round"/>
-                        <!-- Wand tip star -->
-                        <path d="M36 14L37.5 9L39 14L44 15.5L39 17L37.5 22L36 17L31 15.5Z" fill="#f59e0b"/>
-                        <!-- Sparkles -->
-                        <circle cx="28" cy="8" r="1.5" fill="#7c3aed" opacity="0.8"/>
-                        <circle cx="42" cy="10" r="1" fill="#ec4899" opacity="0.7"/>
-                        <circle cx="44" cy="22" r="1.2" fill="#f59e0b" opacity="0.8"/>
-                        <path d="M22 12L23 10L24 12L26 13L24 14L23 16L22 14L20 13Z" fill="#a78bfa" opacity="0.7"/>
-                        <path d="M40 4L40.7 2L41.4 4L43 4.7L41.4 5.4L40.7 7L40 5.4L38 4.7Z" fill="#ec4899" opacity="0.6"/>
+                    <svg width="28" height="28" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#8fbffa" fill-rule="evenodd" d="M6.035 2.507c-0.653 1.073 -0.204 2.73 1.344 3 0.545 0.095 0.978 0.51 1.096 1.05l0.02 0.092c0.454 2.073 3.407 2.086 3.878 0.017l0.025 -0.108a1.4 1.4 0 0 1 0.04 -0.139v5.791c0 0.941 -0.764 1.704 -1.705 1.704H1.734A1.704 1.704 0 0 1 0.03 12.21V4.211c0 -0.941 0.763 -1.704 1.704 -1.704h4.3Z" clip-rule="evenodd"></path>
+                        <path fill="#2859c5" fill-rule="evenodd" d="M3.08 7.797a0.625 0.625 0 1 0 -0.883 0.884L3.255 9.74l-1.058 1.058a0.625 0.625 0 0 0 0.884 0.884l1.5 -1.5a0.625 0.625 0 0 0 0 -0.884l-1.5 -1.5Zm2.559 2.817a0.625 0.625 0 1 0 0 1.25h1.5a0.625 0.625 0 0 0 0 -1.25h-1.5Z" clip-rule="evenodd"></path>
+                        <path fill="#2859c5" fill-rule="evenodd" d="M6.035 2.507c-0.653 1.073 -0.204 2.73 1.344 3 0.318 0.055 0.598 0.22 0.8 0.454H0.028V4.21c0 -0.941 0.764 -1.704 1.705 -1.704h4.3Z" clip-rule="evenodd"></path>
+                        <path fill="#2859c5" fill-rule="evenodd" d="M11.233 0.721C11.04 -0.13 9.825 -0.125 9.638 0.728l-0.007 0.035 -0.015 0.068A2.53 2.53 0 0 1 7.58 2.772c-0.887 0.154 -0.887 1.428 0 1.582a2.53 2.53 0 0 1 2.038 1.952l0.02 0.093c0.187 0.852 1.401 0.858 1.595 0.007l0.025 -0.108a2.546 2.546 0 0 1 2.046 -1.942c0.889 -0.155 0.889 -1.43 0 -1.585A2.546 2.546 0 0 1 11.26 0.844l-0.018 -0.082 -0.01 -0.041Z" clip-rule="evenodd"></path>
                     </svg>
                 </span>
                 <span class="logo-text">Prompt Gallery</span>
             </div>
             <div class="header-actions">
+                <button class="icon-btn search-toggle-btn" id="search-toggle" aria-label="Search prompts">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
                 <button class="icon-btn theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme">
                     <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="5"></circle>
@@ -61,6 +81,22 @@
                 </button>
             </div>
         </div>
+        <!-- Search Bar (hidden by default) -->
+        <div class="search-bar hidden" id="search-bar">
+            <div class="search-inner">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="search-input" placeholder="Search prompts..." autocomplete="off">
+                <button class="search-clear" id="search-clear" aria-label="Clear search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
     </header>
 
     <!-- Main Content -->
@@ -73,6 +109,7 @@
                 <button class="filter-pill" data-category="women">Women</button>
                 <button class="filter-pill" data-category="kids">Kids</button>
                 <button class="filter-pill" data-category="family">Family</button>
+                <button class="filter-pill" data-category="couple">Couple</button>
             </div>
         </div>
 
@@ -81,11 +118,14 @@
             <!-- Cards injected by JS -->
         </div>
 
+        <!-- Load More Sentinel (for infinite scroll) -->
+        <div class="load-more-sentinel" id="load-more-sentinel"></div>
+
         <!-- Empty State -->
         <div class="empty-state hidden" id="empty-state">
             <span class="empty-icon">📭</span>
             <h3>No prompts found</h3>
-            <p>Try selecting a different category</p>
+            <p>Try a different search or category</p>
         </div>
 
         <!-- Loading State -->
@@ -97,11 +137,22 @@
 
     <!-- Prompt Detail Modal -->
     <div class="modal-overlay" id="detail-modal">
-        <div class="modal-container">
+        <div class="modal-container" id="modal-container">
             <button class="modal-close" id="modal-close" aria-label="Close">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <!-- Swipe navigation arrows -->
+            <button class="modal-nav modal-nav-prev" id="modal-prev" aria-label="Previous prompt">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <button class="modal-nav modal-nav-next" id="modal-next" aria-label="Next prompt">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
             </button>
             <div class="modal-body">
@@ -110,6 +161,13 @@
                 </div>
                 <div class="modal-info">
                     <div class="modal-category" id="modal-category"></div>
+                    <div class="modal-views" id="modal-views">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <span id="modal-view-count">0</span> views
+                    </div>
                     <h3 class="modal-section-title">Prompt</h3>
                     <p class="modal-prompt-text" id="modal-prompt"></p>
                     <div class="modal-actions">
@@ -162,7 +220,7 @@
     <footer class="site-footer">
         <div class="footer-inner">
             <p>Made with ❤️ for AI Artists</p>
-            <img src="https://visitor-badge.laobi.icu/badge?page_id=prompt-gallery-site" alt="Visitors" class="visitor-badge">
+            <img src="https://visitor-badge.laobi.icu/badge?page_id=prophecy10.prompt-gallery" alt="Visitors" class="visitor-badge">
         </div>
     </footer>
 

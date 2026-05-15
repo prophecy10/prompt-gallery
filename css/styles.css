@@ -18,17 +18,17 @@
 }
 
 [data-theme="dark"] {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-card: #1e293b;
+    --bg-primary: #000000;
+    --bg-secondary: #0a0a0a;
+    --bg-card: #111111;
     --text-primary: #f1f5f9;
     --text-secondary: #94a3b8;
     --accent: #a78bfa;
     --accent-hover: #8b5cf6;
-    --accent-light: #1e1b4b;
-    --border: #334155;
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
+    --accent-light: #1a1a2e;
+    --border: #1f1f1f;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
 }
 
 /* ===== Reset ===== */
@@ -45,6 +45,42 @@ body {
     min-height: 100vh;
     line-height: 1.6;
     transition: background-color 0.3s ease, color 0.3s ease;
+    overscroll-behavior-y: contain;
+}
+
+/* ===== Pull to Refresh ===== */
+.pull-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 13px;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+    z-index: 200;
+}
+
+.pull-indicator.visible {
+    transform: translateY(0);
+}
+
+.pull-indicator.refreshing .pull-spinner {
+    animation: spin 0.8s linear infinite;
+}
+
+.pull-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
 }
 
 /* ===== Header ===== */
@@ -75,6 +111,7 @@ body {
 
 .logo-icon {
     font-size: 28px;
+    display: flex;
 }
 
 .logo-text {
@@ -115,7 +152,54 @@ body {
 .icon-sun { display: none; }
 .icon-moon { display: block; }
 
-/* Favorites count badge - removed */
+/* ===== Search Bar ===== */
+.search-bar {
+    border-top: 1px solid var(--border);
+    background: var(--bg-secondary);
+}
+
+.search-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+}
+
+.search-inner input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 15px;
+    color: var(--text-primary);
+    outline: none;
+    font-family: inherit;
+}
+
+.search-inner input::placeholder {
+    color: var(--text-secondary);
+}
+
+.search-clear {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.search-clear:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
 
 /* ===== Filters ===== */
 .filters-bar {
@@ -226,6 +310,24 @@ body {
     transform: scale(1.05);
 }
 
+/* Skeleton shimmer for loading images */
+.card-image-wrap.loading {
+    background: var(--bg-primary);
+}
+
+.card-image-wrap.loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
 .card-overlay {
     position: absolute;
     inset: 0;
@@ -237,7 +339,6 @@ body {
     transition: background 0.2s ease;
 }
 
-/* On hover, make the gradient stronger */
 @media (hover: hover) {
     .gallery-card:hover .card-overlay {
         background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%);
@@ -266,7 +367,6 @@ body {
     backdrop-filter: blur(4px);
 }
 
-/* On hover, make buttons pop */
 @media (hover: hover) {
     .card-btn:hover {
         background: rgba(255, 255, 255, 0.95);
@@ -274,7 +374,6 @@ body {
     }
 }
 
-/* On mobile, make buttons slightly smaller and more transparent */
 @media (hover: none) {
     .card-btn {
         width: 32px;
@@ -297,8 +396,43 @@ body {
     color: var(--accent);
 }
 
-.card-category {
-    display: none;
+/* New/Trending Badge */
+.card-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* View count on card */
+.card-views {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(4px);
+    z-index: 2;
+}
+
+.card-views svg {
+    width: 12px;
+    height: 12px;
 }
 
 /* ===== Loading & Empty States ===== */
@@ -353,6 +487,12 @@ body {
     display: none !important;
 }
 
+/* Load more sentinel */
+.load-more-sentinel {
+    height: 1px;
+    width: 100%;
+}
+
 /* ===== Modal ===== */
 .modal-overlay {
     position: fixed;
@@ -379,6 +519,7 @@ body {
     overflow-y: auto;
     position: relative;
     animation: modalIn 0.25s ease;
+    touch-action: pan-y;
 }
 
 @keyframes modalIn {
@@ -406,6 +547,53 @@ body {
 
 .modal-close:hover {
     background: rgba(0, 0, 0, 0.7);
+}
+
+/* Modal navigation arrows */
+.modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.2s;
+}
+
+.modal-nav:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.modal-nav-prev {
+    left: -50px;
+}
+
+.modal-nav-next {
+    right: -50px;
+}
+
+@media (max-width: 900px) {
+    .modal-nav-prev { left: 8px; }
+    .modal-nav-next { right: 8px; }
+    .modal-nav {
+        background: rgba(0, 0, 0, 0.6);
+        width: 36px;
+        height: 36px;
+    }
+}
+
+.modal-nav:disabled {
+    opacity: 0.3;
+    cursor: default;
 }
 
 .modal-body {
@@ -447,6 +635,14 @@ body {
     font-weight: 600;
     text-transform: capitalize;
     width: fit-content;
+}
+
+.modal-views {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
 }
 
 .modal-section-title {
@@ -590,7 +786,6 @@ body {
     font-size: 40px;
 }
 
-/* Favorite item in panel */
 .fav-item {
     display: flex;
     gap: 12px;
