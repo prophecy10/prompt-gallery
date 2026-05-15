@@ -943,3 +943,143 @@ body {
 .backdrop.show {
     display: block;
 }
+
+
+/* ===== iOS Bottom Sheet ===== */
+.bottom-sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+.bottom-sheet-overlay.open {
+    display: flex;
+}
+
+.bottom-sheet {
+    background: var(--bg-secondary);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 500px;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: sheetSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+@keyframes sheetSlideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.bottom-sheet-handle {
+    width: 36px;
+    height: 5px;
+    background: var(--border);
+    border-radius: 100px;
+    margin: 10px auto 0;
+}
+
+.bottom-sheet-content {
+    padding: 20px 24px 24px;
+}
+
+.sheet-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.sheet-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.sheet-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sheet-section {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.sheet-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    border-radius: 10px;
+}
+
+.sheet-section h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.sheet-section p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.sheet-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+}
+
+.sheet-disclaimer {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+}
+
+.sheet-disclaimer p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.sheet-disclaimer strong {
+    color: var(--text-primary);
+}
+
+.sheet-close-btn {
+    display: block;
+    width: 100%;
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.sheet-close-btn:hover {
+    background: var(--accent-hover);
+}
+
+.sheet-close-btn:active {
+    transform: scale(0.98);
+}

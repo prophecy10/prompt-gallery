@@ -28,6 +28,7 @@ async function init() {
     setupInfiniteScroll();
     setupPullToRefresh();
     setupSwipeNavigation();
+    setupInfoSheet();
     registerServiceWorker();
     await loadPrompts();
     renderGallery();
@@ -491,6 +492,28 @@ function renderFavoritesList() {
             renderGallery();
         });
     });
+}
+
+// ===== Info Bottom Sheet =====
+function setupInfoSheet() {
+    const infoToggle = document.getElementById('info-toggle');
+    const infoOverlay = document.getElementById('info-overlay');
+    const infoCloseBtn = document.getElementById('info-close-btn');
+
+    infoToggle.addEventListener('click', () => {
+        infoOverlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    });
+
+    infoCloseBtn.addEventListener('click', closeInfoSheet);
+    infoOverlay.addEventListener('click', (e) => {
+        if (e.target === infoOverlay) closeInfoSheet();
+    });
+
+    function closeInfoSheet() {
+        infoOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+    }
 }
 
 // ===== PWA Service Worker =====

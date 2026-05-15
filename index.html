@@ -58,6 +58,13 @@
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                 </button>
+                <button class="icon-btn info-btn" id="info-toggle" aria-label="About this site">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </button>
                 <button class="icon-btn theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme">
                     <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="5"></circle>
@@ -223,6 +230,46 @@
             <img src="https://visitor-badge.laobi.icu/badge?page_id=prophecy10.prompt-gallery" alt="Visitors" class="visitor-badge">
         </div>
     </footer>
+
+    <!-- Info Bottom Sheet (iOS style) -->
+    <div class="bottom-sheet-overlay" id="info-overlay">
+        <div class="bottom-sheet" id="info-sheet">
+            <div class="bottom-sheet-handle"></div>
+            <div class="bottom-sheet-content">
+                <div class="sheet-header">
+                    <h2>About Prompt Gallery</h2>
+                </div>
+                <div class="sheet-body">
+                    <div class="sheet-section">
+                        <div class="sheet-icon">✨</div>
+                        <div>
+                            <h3>What is this?</h3>
+                            <p>A simple, free gallery of AI image generation prompts. Browse images, find one you like, and copy the exact prompt used to create it.</p>
+                        </div>
+                    </div>
+                    <div class="sheet-section">
+                        <div class="sheet-icon">🔒</div>
+                        <div>
+                            <h3>Your Privacy</h3>
+                            <p>No login. No signup. No ads. No donations. No tracking. We do not collect any personal information. Everything stays on your device.</p>
+                        </div>
+                    </div>
+                    <div class="sheet-section">
+                        <div class="sheet-icon">📋</div>
+                        <div>
+                            <h3>How to use</h3>
+                            <p>Browse the gallery, tap an image to see the full prompt, and hit "Copy Prompt" to use it with your favourite AI image generator.</p>
+                        </div>
+                    </div>
+                    <div class="sheet-divider"></div>
+                    <div class="sheet-disclaimer">
+                        <p><strong>Disclaimer:</strong> AI-generated images may not always match expectations. Results vary depending on the AI model, settings, and interpretation. We are not responsible for any unexpected or unintended image outputs.</p>
+                    </div>
+                </div>
+                <button class="sheet-close-btn" id="info-close-btn">Got it</button>
+            </div>
+        </div>
+    </div>
 
     <script src="js/app.js"></script>
 </body>
