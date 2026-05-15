@@ -1,23 +1,9 @@
 [
   {
-    "id": 3,
-    "category": "couple",
-    "prompt": "Create an image as the reference picture Retro 90s Pinterest-style cinematic, grainy bright. Girl in red saree, leaning back to guy, hair moving in wind. Guy in white kurta Chinese collar, back-to-back pose, looking sideways. Faces identical to reference. Medium shot, 50mm lens, dramatic shadows on wall, nostalgic cinematic feel. Keep the face same as the reference image",
-    "image_url": "https://res.cloudinary.com/ddmmf6dz4/image/upload/v1778063880/snmfuzlvmppcgmgstc9q_tdmn8u.png",
-    "date": "2026-05-06"
-  },
-  {
-    "id": 2,
-    "category": "women",
-    "prompt": "A  perfect flower chiffon white color pinteresty aesthetic retro saree It must feel like a 90s movie dark brown wavy curly hair with a small flower tucked visibly into her curls.the girl is standing against a solid wall deep shadows and contrast drama lotus flower bookay in her hand while rose petals are showering on her and creating a mysterious and artistic atmosphere where the lighting is worm a golden tones of evoking a sunset or golden hour glow please do not change the face",
-    "image_url": "https://res.cloudinary.com/ddmmf6dz4/image/upload/v1778063880/injvtqgwulnnmgihdag4_jvdd0r.png",
-    "date": "2026-05-06"
-  },
-  {
     "id": 1,
     "category": "men",
-    "prompt": "Cinematic editorial portrait of a man sitting by a large window, holding a ceramic mug and gazing thoughtfully outside. He has tousled brown hair and a contemplative expression, dressed in a textured beige knit sweater and loose cream linen trousers. A sleek laptop rests beside him on the stone window ledge with soft fabric accents and neutral cushions. Warm natural daylight filters in, casting golden highlights and soft shadows across the textured plaster wall and minimal modern interior",
+    "prompt": "Cinematic editorial portrait of a man sitting by a large window...",
     "image_url": "https://res.cloudinary.com/ddmmf6dz4/image/upload/v1778063880/bjqgd9zkmgbtlc9wj4gs_u0lbzu.png",
-    "date": "2026-05-06"
+    "date": "2026-05-15"
   }
 ]
