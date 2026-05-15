@@ -223,8 +223,8 @@ function setupSearch() {
     searchClear.addEventListener('click', () => {
         searchInput.value = '';
         searchQuery = '';
+        searchBar.classList.add('hidden');
         renderGallery();
-        searchInput.focus();
     });
 }
 
