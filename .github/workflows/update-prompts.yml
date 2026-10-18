@@ -27,6 +27,9 @@ jobs:
           SHEET_CSV_URL: ${{ secrets.GOOGLE_SHEET_CSV_URL }}
         run: node scripts/build-prompts.js
 
+      - name: Build prompt pages
+        run: node scripts/build-pages.js
+
       - name: Generate sitemap
         run: node scripts/generate-sitemap.js
 
@@ -34,6 +37,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add prompts.json sitemap.xml
+          git add prompts.json sitemap.xml p/
           git diff --staged --quiet || git commit -m "Update prompts from Google Sheet"
           git push

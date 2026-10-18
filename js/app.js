@@ -32,6 +32,30 @@ async function init() {
     registerServiceWorker();
     await loadPrompts();
     renderGallery();
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+}
+
+// ===== Deep links: "#prompt-9" opens that prompt =====
+function openFromHash() {
+    const m = location.hash.match(/^#prompt-(\d+)$/);
+    if (!m) return;
+    const id = parseInt(m[1], 10);
+    if (prompts.some(p => p.id === id)) openDetail(id);
+}
+
+// ===== Share: links to the prompt's own page (p/<id>.html), which carries its image as the preview =====
+function sharePrompt(prompt) {
+    const base = location.href.split('#')[0].replace(/index\.html$/, '').replace(/\/?$/, '/');
+    const url = base + 'p/' + prompt.id + '.html';
+    const text = 'AI image prompt: ' + prompt.prompt.slice(0, 90) + (prompt.prompt.length > 90 ? '…' : '');
+    if (navigator.share) {
+        navigator.share({ title: 'Prompt Gallery', text, url }).catch(() => {});
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => showToast('Link copied!'), () => window.open(url, '_blank'));
+    } else {
+        window.open(url, '_blank');
+    }
 }
 
 // ===== Data Loading =====
@@ -110,7 +134,7 @@ function cardHTML(prompt) {
     return `
         <div class="gallery-card" data-id="${prompt.id}">
             <div class="card-image-wrap loading">
-                <img src="${prompt.image}" alt="AI prompt image" class="card-image" loading="lazy" onload="this.parentElement.classList.remove('loading')">
+                <img src="${escapeHtml(safeImage(prompt.image))}" alt="${escapeHtml(prompt.prompt.slice(0, 120))}" class="card-image" loading="lazy" onload="this.parentElement.classList.remove('loading')">
                 ${isNew ? '<span class="card-badge">New</span>' : ''}
                 ${views > 0 ? `<span class="card-views"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>${views}</span>` : ''}
                 <div class="card-overlay">
@@ -267,6 +291,10 @@ function setupModal() {
         if (currentPrompt) copyToClipboard(currentPrompt.prompt);
     });
 
+    document.getElementById('modal-share-btn').addEventListener('click', () => {
+        if (currentPrompt) sharePrompt(currentPrompt);
+    });
+
     document.getElementById('modal-fav-btn').addEventListener('click', () => {
         if (currentPrompt) {
             toggleFavorite(currentPrompt.id);
@@ -300,7 +328,10 @@ function openDetail(id) {
     viewCounts[id] = (viewCounts[id] || 0) + 1;
     localStorage.setItem('pg_views', JSON.stringify(viewCounts));
 
-    document.getElementById('modal-image').src = prompt.image;
+    document.getElementById('modal-image').src = safeImage(prompt.image);
+    document.getElementById('modal-image').alt = prompt.prompt.slice(0, 120);
+    // Make the address bar point at this prompt, so it can be copied or bookmarked
+    if (location.hash !== '#prompt-' + id) history.replaceState(null, '', '#prompt-' + id);
     document.getElementById('modal-prompt').textContent = prompt.prompt;
     document.getElementById('modal-category').textContent = prompt.category;
     document.getElementById('modal-view-count').textContent = viewCounts[id];
@@ -312,6 +343,7 @@ function openDetail(id) {
 }
 
 function closeDetail() {
+    if (location.hash.startsWith('#prompt-')) history.replaceState(null, '', location.pathname + location.search);
     detailModal.classList.remove('open');
     document.body.style.overflow = '';
     currentPrompt = null;
@@ -461,10 +493,10 @@ function renderFavoritesList() {
     empty.classList.add('hidden');
     list.innerHTML = favPrompts.map(p => `
         <div class="fav-item" data-id="${p.id}">
-            <img src="${p.image}" alt="" class="fav-item-image">
+            <img src="${escapeHtml(safeImage(p.image))}" alt="" class="fav-item-image">
             <div class="fav-item-info">
-                <div class="fav-item-category">${p.category}</div>
-                <div class="fav-item-prompt">${p.prompt}</div>
+                <div class="fav-item-category">${escapeHtml(p.category)}</div>
+                <div class="fav-item-prompt">${escapeHtml(p.prompt)}</div>
             </div>
             <button class="fav-item-remove" data-id="${p.id}" aria-label="Remove from favorites">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -526,6 +558,13 @@ function registerServiceWorker() {
 }
 
 // ===== Utilities =====
+// Prompts come from a form-fed sheet, so never insert them as raw HTML
+function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function safeImage(u) { return /^https:\/\/[^\s"'<>]+$/i.test(String(u || '')) ? u : ''; }
+
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
         showToast('Prompt copied!');

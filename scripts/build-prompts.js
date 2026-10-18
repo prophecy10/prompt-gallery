@@ -61,6 +61,13 @@ async function main() {
         // Skip empty rows
         if (!prompt || !imageUrl) continue;
 
+        // Only plain https image links get through. The sheet is fed by a form, so anything
+        // else (javascript:, quotes, HTML) is dropped rather than published on the site.
+        if (!/^https:\/\/[^\s"'<>]+$/i.test(imageUrl)) {
+            console.warn(`Row ${i + 1}: skipped, image URL is not a plain https link`);
+            continue;
+        }
+
         // Extract date from timestamp or use today
         let date = new Date().toISOString().split('T')[0];
         if (timestampIdx !== -1 && row[timestampIdx]) {
@@ -72,7 +79,7 @@ async function main() {
 
         prompts.push({
             id: i,
-            category: category || 'other',
+            category: category.replace(/[^a-z0-9 -]/g, '').slice(0, 30) || 'other',
             prompt: prompt,
             image_url: imageUrl,
             date: date
